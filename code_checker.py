@@ -27,7 +27,7 @@ async def main():
     async for message in query(
         prompt=review_prompt,
         options=ClaudeCodeOptions(
-            max_turns=5,  # Allow enough turns to complete analysis
+            max_turns=20,  # Increase further to ensure complete analysis
             cwd=".",
             # Only allow reading tools - no code changes
             allowed_tools=["Read", "Grep", "Glob"],
