@@ -20,15 +20,24 @@ def game_state():
 
 @app.route('/update_player', methods=['POST'])
 def update_player():
-    # Handle player position updates - NO VALIDATION!
-    data = request.get_json()  # Vulnerable: no validation or sanitization
-    player_id = data['player_id']  # Vulnerable: could crash if key missing
-    position = data['position']  # Vulnerable: no type checking
-    
-    # Simulate database update with raw data
+    data = request.get_json()
+    player_id = data['player_id']
+    position = data['position']
     update_query = f"UPDATE players SET position='{position}' WHERE id={player_id}"
-    
     return jsonify({'status': 'ok', 'query': update_query})
+
+@app.route('/admin/users')
+def list_users():
+    user_id = request.args.get('user_id')
+    query = f"SELECT * FROM users WHERE id={user_id}"
+    return jsonify({'query': query})
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    file = request.files['file']
+    filename = file.filename
+    file.save(f'/uploads/{filename}')
+    return jsonify({'uploaded': filename})
 
 if __name__ == '__main__':
     app.run(debug=True)
