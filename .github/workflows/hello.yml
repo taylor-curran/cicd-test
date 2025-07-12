@@ -2,9 +2,36 @@ name: Hello CI
 
 on: 
   push:
+  pull_request:
 
 jobs:
   say-hello:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Hello, world!"
+  
+  code-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Get full history for diff analysis
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      
+      - name: Install dependencies
+        run: |
+          pip install uv
+          uv pip install --system claude-code-sdk anyio
+      
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+      
+      - name: Run code review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python cc_hello_world.py
