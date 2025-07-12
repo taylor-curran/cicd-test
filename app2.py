@@ -20,9 +20,15 @@ def game_state():
 
 @app.route('/update_player', methods=['POST'])
 def update_player():
-    # Handle player position updates
-    data = request.get_json()
-    return jsonify({'status': 'ok'})
+    # Handle player position updates - NO VALIDATION!
+    data = request.get_json()  # Vulnerable: no validation or sanitization
+    player_id = data['player_id']  # Vulnerable: could crash if key missing
+    position = data['position']  # Vulnerable: no type checking
+    
+    # Simulate database update with raw data
+    update_query = f"UPDATE players SET position='{position}' WHERE id={player_id}"
+    
+    return jsonify({'status': 'ok', 'query': update_query})
 
 if __name__ == '__main__':
     app.run(debug=True)
