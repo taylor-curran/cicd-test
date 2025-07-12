@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Simple Claude Code SDK interaction example.
-This demonstrates basic usage of the claude-code-sdk Python package.
+Automated code review using Claude Code SDK.
+Reviews code changes against best practices guidelines.
 """
 
 import anyio
@@ -9,8 +9,8 @@ from claude_code_sdk import query, ClaudeCodeOptions, Message
 
 
 async def main():
-    """Main function demonstrating Claude Code SDK usage."""
-    print("Starting Claude Code SDK interaction...")
+    """Run automated code review against best practices."""
+    print("🔍 Starting automated code review...")
     
     # Store messages from the conversation
     messages: list[Message] = []
@@ -39,50 +39,20 @@ async def main():
     ):
         messages.append(message)
         
+        # Show progress and final metrics
         message_type = type(message).__name__
-        print(f"Received: {message_type}")
-        
-        # Show authentication details from SystemMessage
-        if message_type == 'SystemMessage':
-            if hasattr(message, 'data'):
-                data = message.data
-                print(f"  API Key Source: {data.get('apiKeySource', 'unknown')}")
-                print(f"  Model: {data.get('model', 'unknown')}")
-                print(f"  Session ID: {data.get('session_id', 'unknown')}")
-        
-        # Show assistant responses
-        elif message_type == 'AssistantMessage':
-            if hasattr(message, 'content') and message.content:
-                # Extract text from the content
-                text_parts = []
-                for content_item in message.content:
-                    if hasattr(content_item, 'text'):
-                        text_parts.append(content_item.text)
-                if text_parts:
-                    print(f"  Assistant: {text_parts[0][:200]}...")
-        
-        # Show final result
-        elif message_type == 'ResultMessage':
-            print(f"  Cost: ${message.total_cost_usd:.4f}")
-            print(f"  Duration: {message.duration_ms}ms")
-            print(f"  Turns: {message.num_turns}")
-            if hasattr(message, 'result') and message.result:
-                print(f"  Final result: {message.result[:200]}...")
-            else:
-                print("  No final result returned")
+        if message_type == 'ResultMessage':
+            print(f"✅ Review completed: ${message.total_cost_usd:.4f} | {message.duration_ms}ms | {message.num_turns} turns")
     
-    print(f"\nConversation completed with {len(messages)} messages")
-    
-    # Extract the actual review from assistant messages
-    print("\n" + "="*50)
-    print("🔍 CODE REVIEW ASSESSMENT")
-    print("="*50)
+    # Extract and display review assessment
+    print("\n" + "="*60)
+    print("📋 CODE REVIEW ASSESSMENT")
+    print("="*60)
     
     review_found = False
     for message in messages:
         if type(message).__name__ == 'AssistantMessage':
             if hasattr(message, 'content') and message.content:
-                # Extract text from the content
                 text_parts = []
                 for content_item in message.content:
                     if hasattr(content_item, 'text'):
@@ -91,12 +61,12 @@ async def main():
                     review_found = True
                     full_text = "\n".join(text_parts)
                     print(full_text)
-                    print("-" * 30)
+                    print("-" * 40)
     
     if not review_found:
         print("⚠️  No review content found")
     
-    print("="*50)
+    print("="*60)
 
 
 if __name__ == "__main__":
