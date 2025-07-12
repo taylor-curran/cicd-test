@@ -40,6 +40,8 @@ python code_checker.py
 
 [Example run](https://github.com/taylor-curran/cicd-test/actions/runs/16243209724/job/45862303481)
 
+<img width="1051" height="781" alt="image" src="https://github.com/user-attachments/assets/ef328ba7-e096-46b8-92b6-a8191a6d53da" />
+
 ## Cost
 ~$0.05-0.15 per review depending on code complexity.
 
