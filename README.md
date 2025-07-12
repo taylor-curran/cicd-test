@@ -38,7 +38,7 @@ python code_checker.py
 3. Push code changes
 4. Check Actions tab for automated review
 
-[Example run](https://github.com/taylor-curran/cicd-test/actions/runs/16243118813/job/45862111982)
+[Example run](https://github.com/taylor-curran/cicd-test/actions/runs/16243209724/job/45862303481)
 
 ## Cost
 ~$0.05-0.15 per review depending on code complexity.
