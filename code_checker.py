@@ -11,9 +11,11 @@ from claude_code_sdk import query, ClaudeCodeOptions, Message
 async def main():
     """Run automated code review against best practices."""
     print("🔍 Starting automated code review...")
+    print("📡 Streaming real-time updates...\n")
     
     # Store messages from the conversation
     messages: list[Message] = []
+    review_content = []
     
     # Code review query - check diff against best practices
     review_prompt = """
@@ -38,32 +40,41 @@ async def main():
         )
     ):
         messages.append(message)
-        
-        # Show progress and final metrics
         message_type = type(message).__name__
-        if message_type == 'ResultMessage':
-            print(f"✅ Review completed: ${message.total_cost_usd:.4f} | {message.duration_ms}ms | {message.num_turns} turns")
-    
-    # Extract and display review assessment
-    print("\n" + "="*60)
-    print("📋 CODE REVIEW ASSESSMENT")
-    print("="*60)
-    
-    review_found = False
-    for message in messages:
-        if type(message).__name__ == 'AssistantMessage':
+        
+        # Stream assistant messages in real-time
+        if message_type == 'AssistantMessage':
             if hasattr(message, 'content') and message.content:
                 text_parts = []
                 for content_item in message.content:
                     if hasattr(content_item, 'text'):
                         text_parts.append(content_item.text)
                 if text_parts:
-                    review_found = True
-                    full_text = "\n".join(text_parts)
-                    print(full_text)
-                    print("-" * 40)
+                    content = "\n".join(text_parts)
+                    print(f"🤖 Claude: {content}")
+                    print("─" * 50)
+                    review_content.append(content)
+        
+        # Show progress indicators for other message types
+        elif message_type == 'UserMessage':
+            print("👤 Analyzing code changes...")
+        
+        # Show final metrics
+        elif message_type == 'ResultMessage':
+            print(f"\n✅ Review completed: ${message.total_cost_usd:.4f} | {message.duration_ms}ms | {message.num_turns} turns")
     
-    if not review_found:
+    # Final summary
+    print("\n" + "="*60)
+    print("📋 FINAL CODE REVIEW SUMMARY")
+    print("="*60)
+    
+    if review_content:
+        for i, content in enumerate(review_content, 1):
+            print(f"\n## Analysis {i}:")
+            print(content)
+            if i < len(review_content):
+                print("-" * 40)
+    else:
         print("⚠️  No review content found")
     
     print("="*60)
