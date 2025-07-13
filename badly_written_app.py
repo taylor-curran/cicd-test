@@ -43,5 +43,24 @@ def execute_command():
 def debug_info():
     return jsonify(dict(os.environ))
 
+@app.route('/api/data')
+def get_data():
+    # No input validation or sanitization
+    raw_input = request.args.get('input')
+    return jsonify({'data': raw_input})
+
+@app.route('/api/bulk', methods=['POST'])
+def bulk_operation():
+    # No rate limiting - can be called unlimited times
+    data = request.json
+    for item in data:
+        # Process without any validation
+        process_item(item)
+    return jsonify({'status': 'processed'})
+
+def process_item(item):
+    # Unsafe processing
+    pass
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
