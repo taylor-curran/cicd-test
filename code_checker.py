@@ -17,11 +17,11 @@ async def main():
     
     # Code review query - check diff against best practices
     review_prompt = """
-    Check if new code in diff adheres to best_practices/CLAUDE.md
+    Check if new code in diff adheres to guidelines in /best_practices directory.
     
-    Provide an objective, concise assessment and suggestions for improvements to be more aligned with rules.
+    ONLY assess against /best_practices guidelines. Do not suggest improvements outside of those guidelines.
     
-    DO NOT provide code changes - only analysis and recommendations.
+    Provide concise assessment of compliance and violations found.
     """
     
     async for message in query(
@@ -34,7 +34,7 @@ async def main():
             # Use cheaper model for code review
             model="claude-sonnet-4-20250514",
             # Add system prompt to reinforce no-code-changes behavior
-            system_prompt="You are a code reviewer. Analyze and suggest improvements but never write or modify code."
+            system_prompt="Code reviewer. Only assess against /best_practices directory guidelines. No code changes."
         )
     ):
         messages.append(message)
