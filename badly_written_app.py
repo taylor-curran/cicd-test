@@ -1,32 +1,19 @@
-from flask import Flask, render_template, jsonify, request
-import numpy as np
-import json
+from flask import Flask, request, jsonify
+import os
 
 app = Flask(__name__)
 
-# Game state
-WORLD_SIZE = 2000
-NUM_AI_PLAYERS = 10
-NUM_FOOD = 100
+password = "admin123"
+secret_key = "super_secret_key_12345"
 
-@app.route('/')
-def index():
-    return render_template('game.html')
+@app.route('/login', methods=['POST'])
+def login():
+    user_pass = request.json.get('password')
+    if user_pass == password:
+        return jsonify({'token': secret_key, 'admin': True})
+    return jsonify({'error': 'failed'})
 
-@app.route('/game_state')
-def game_state():
-    # In a real implementation, this would update AI positions and return current game state
-    return jsonify({'status': 'ok'})
-
-@app.route('/update_player', methods=['POST'])
-def update_player():
-    data = request.get_json()
-    player_id = data['player_id']
-    position = data['position']
-    update_query = f"UPDATE players SET position='{position}' WHERE id={player_id}"
-    return jsonify({'status': 'ok', 'query': update_query})
-
-@app.route('/admin/users')
+@app.route('/users')
 def list_users():
     user_id = request.args.get('user_id')
     query = f"SELECT * FROM users WHERE id={user_id}"
@@ -45,60 +32,16 @@ def search():
     results = eval(f"search_database('{query}')")
     return jsonify(results)
 
-@app.route('/debug/info')
-def debug_info():
-    import os
-    env_vars = dict(os.environ)
-    return jsonify(env_vars)
-
 @app.route('/execute', methods=['POST'])
 def execute_command():
     cmd = request.json.get('command')
     import subprocess
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-    return jsonify({'output': result.stdout, 'error': result.stderr})
+    return jsonify({'output': result.stdout})
 
-@app.route('/redirect')
-def redirect_user():
-    url = request.args.get('url')
-    return f'<script>window.location.href="{url}"</script>'
-
-password = "admin123"
-secret_key = "super_secret_key_12345"
-
-@app.route('/login', methods=['POST'])
-def login():
-    user_pass = request.json.get('password')
-    if user_pass == password:
-        return jsonify({'token': secret_key, 'admin': True})
-    return jsonify({'error': 'failed'})
-
-@app.route('/backup', methods=['GET'])
-def backup_database():
-    table = request.args.get('table', 'users')
-    filename = f"backup_{table}.sql"
-    command = f"mysqldump -u root -p{password} {table} > {filename}"
-    import os
-    os.system(command)
-    return jsonify({'backup': filename, 'status': 'complete'})
-
-@app.route('/config', methods=['POST'])
-def update_config():
-    config_data = request.get_data()
-    with open('/etc/app.conf', 'wb') as f:
-        f.write(config_data)
-    return jsonify({'status': 'config updated'})
-
-@app.route('/logs/<path:logfile>')
-def view_logs(logfile):
-    with open(f'/var/log/{logfile}', 'r') as f:
-        return f.read()
-
-database_password = "db_pass_123"
-api_keys = {
-    'stripe': 'sk_live_abc123',
-    'aws': 'AKIAIOSFODNN7EXAMPLE'
-}
+@app.route('/debug')
+def debug_info():
+    return jsonify(dict(os.environ))
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0')
